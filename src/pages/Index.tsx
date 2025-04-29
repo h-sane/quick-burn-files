@@ -6,7 +6,7 @@ import FileUpload from '@/components/FileUpload';
 import MessageInput from '@/components/MessageInput';
 import ExpirationOptions from '@/components/ExpirationOptions';
 import GeneratedLink from '@/components/GeneratedLink';
-import { storageService } from '@/services/storage';
+import { supabaseService } from '@/services/supabase';
 import { toast } from 'sonner';
 
 const Index = () => {
@@ -31,7 +31,7 @@ const Index = () => {
     setMessage(newMessage);
   };
 
-  const handleCreateSecret = () => {
+  const handleCreateSecret = async () => {
     if (activeTab === 'message' && !message.trim()) {
       toast.error('Please enter a message');
       return;
@@ -48,9 +48,9 @@ const Index = () => {
       let id;
 
       if (activeTab === 'message') {
-        id = storageService.storeSecret(message, 'text', maxViews, expiryDays);
+        id = await supabaseService.storeSecret(message, 'text', maxViews, expiryDays);
       } else {
-        id = storageService.storeSecret(
+        id = await supabaseService.storeSecret(
           fileContent!,
           'file',
           maxViews,

@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Copy } from 'lucide-react';
 import { toast } from 'sonner';
+import { generateMaskedUrl } from '@/services/urlMasking';
 
 interface GeneratedLinkProps {
   secretId: string | null;
@@ -12,16 +13,33 @@ interface GeneratedLinkProps {
 
 const GeneratedLink: React.FC<GeneratedLinkProps> = ({ secretId }) => {
   const [copied, setCopied] = useState(false);
+  const [maskedUrl, setMaskedUrl] = useState("");
+  
+  useEffect(() => {
+    if (secretId) {
+      // Generate a masked URL
+      const shortId = generateMaskedUrl(secretId);
+      
+      // Create the full URL but remove the domain part for display
+      const fullUrl = `${window.location.origin}/view/${secretId}`;
+      // Replace the domain with a generic "vanishvault.com" domain in displayed URL
+      const displayUrl = fullUrl.replace(window.location.host, 'vanishvault.com');
+      
+      setMaskedUrl(displayUrl);
+    }
+  }, [secretId]);
   
   if (!secretId) {
     return null;
   }
   
-  const link = `${window.location.origin}/view/${secretId}`;
+  // The real link that will be copied to clipboard
+  const actualLink = `${window.location.origin}/view/${secretId}`;
   
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(link);
+      // Copy the real link, not the masked display URL
+      await navigator.clipboard.writeText(actualLink);
       setCopied(true);
       toast.success('Link copied to clipboard');
       
@@ -46,7 +64,7 @@ const GeneratedLink: React.FC<GeneratedLinkProps> = ({ secretId }) => {
         
         <div className="flex items-center gap-2">
           <Input
-            value={link}
+            value={maskedUrl}
             readOnly
             className="font-mono text-sm"
           />

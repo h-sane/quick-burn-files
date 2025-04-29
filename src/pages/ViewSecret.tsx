@@ -6,7 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { toast } from 'sonner';
-import { SecretData, storageService } from '@/services/storage';
+import { SecretData } from '@/services/storage';
+import { supabaseService } from '@/services/supabase';
+import { extractSecretIdFromMaskedUrl } from '@/services/urlMasking';
 import { Eye, Download, ArrowLeft, Clock, Trash } from 'lucide-react';
 
 const ViewSecret = () => {
@@ -21,22 +23,29 @@ const ViewSecret = () => {
       return;
     }
 
-    try {
-      const result = storageService.retrieveSecret(id);
-      setStatus(result.status);
-      
-      if (result.data) {
-        setSecretData(result.data);
-        setRemainingViews(Math.max(0, result.data.maxViews - result.data.views));
+    const fetchSecret = async () => {
+      try {
+        // Extract the real ID if this is a masked URL
+        const realId = extractSecretIdFromMaskedUrl(id) || id;
         
-        if (result.status === 'success' && result.data.maxViews === result.data.views) {
-          toast.info('This content will self-destruct after viewing');
+        const result = await supabaseService.retrieveSecret(realId);
+        setStatus(result.status);
+        
+        if (result.data) {
+          setSecretData(result.data);
+          setRemainingViews(Math.max(0, result.data.maxViews - result.data.views));
+          
+          if (result.status === 'success' && result.data.maxViews === result.data.views) {
+            toast.info('This content will self-destruct after viewing');
+          }
         }
+      } catch (error) {
+        console.error('Failed to retrieve secret', error);
+        setStatus('not_found');
       }
-    } catch (error) {
-      console.error('Failed to retrieve secret', error);
-      setStatus('not_found');
-    }
+    };
+    
+    fetchSecret();
   }, [id]);
 
   const downloadFile = () => {
