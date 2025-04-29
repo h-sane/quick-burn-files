@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Copy } from 'lucide-react';
+import { Copy, Key } from 'lucide-react';
 import { toast } from 'sonner';
 import { generateMaskedUrl } from '@/services/urlMasking';
 
@@ -13,19 +13,13 @@ interface GeneratedLinkProps {
 
 const GeneratedLink: React.FC<GeneratedLinkProps> = ({ secretId }) => {
   const [copied, setCopied] = useState(false);
-  const [maskedUrl, setMaskedUrl] = useState("");
+  const [displayUrl, setDisplayUrl] = useState("");
   
   useEffect(() => {
     if (secretId) {
-      // Generate a masked URL
-      const shortId = generateMaskedUrl(secretId);
-      
-      // Create the full URL but remove the domain part for display
-      const fullUrl = `${window.location.origin}/view/${secretId}`;
-      // Replace the domain with a generic "vanishvault.com" domain in displayed URL
-      const displayUrl = fullUrl.replace(window.location.host, 'vanishvault.com');
-      
-      setMaskedUrl(displayUrl);
+      // Create a fully masked URL that doesn't expose any domain
+      const maskedId = generateMaskedUrl(secretId);
+      setDisplayUrl(`secret/${maskedId}`);
     }
   }, [secretId]);
   
@@ -53,34 +47,37 @@ const GeneratedLink: React.FC<GeneratedLinkProps> = ({ secretId }) => {
   };
   
   return (
-    <Card className="shadow-md border-2 border-primary/20">
+    <Card className="shadow-md border border-neutral-800 bg-black/80 text-white">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg text-center">Your Secret Link</CardTitle>
+        <CardTitle className="text-lg text-center flex items-center justify-center gap-2">
+          <Key className="h-5 w-5 text-blue-400" />
+          Your Secret Link
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        <p className="text-sm text-center text-muted-foreground">
+        <p className="text-sm text-center text-neutral-400">
           Share this link with the recipient. Remember that the content will self-destruct based on your settings.
         </p>
         
         <div className="flex items-center gap-2">
           <Input
-            value={maskedUrl}
+            value={displayUrl}
             readOnly
-            className="font-mono text-sm"
+            className="font-mono text-sm border-neutral-700 bg-black text-blue-400"
           />
           <Button
             size="sm"
             variant={copied ? "outline" : "default"}
             onClick={copyToClipboard}
-            className="flex-shrink-0"
+            className="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white"
           >
             <Copy className="h-4 w-4 mr-1" />
             {copied ? 'Copied' : 'Copy'}
           </Button>
         </div>
         
-        <div className="text-center animate-pulse-fade">
-          <p className="text-xs text-red-500 font-medium mt-2">
+        <div className="text-center">
+          <p className="text-xs text-red-400 font-medium mt-2 animate-pulse-fade">
             Do not lose this link! For security, we have no way to recover it.
           </p>
         </div>

@@ -82,11 +82,11 @@ const Index = () => {
     <div className="min-h-screen py-8 vault-container">
       <div className="container max-w-3xl">
         <header className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-primary">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent">
             VanishVault
             <span className="ml-2 text-2xl">✉️💥</span>
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-neutral-400 mt-2">
             Self-destructing secure messages and files
           </p>
         </header>
@@ -99,9 +99,19 @@ const Index = () => {
               onValueChange={(v) => setActiveTab(v as 'message' | 'file')}
               className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="message">Secure Message</TabsTrigger>
-                <TabsTrigger value="file">Secure File</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 bg-neutral-900 border border-neutral-800">
+                <TabsTrigger 
+                  value="message"
+                  className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                >
+                  Secure Message
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="file"
+                  className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                >
+                  Secure File
+                </TabsTrigger>
               </TabsList>
               <div className="mt-6">
                 <TabsContent value="message" className="mt-0">
@@ -124,7 +134,7 @@ const Index = () => {
               <Button 
                 onClick={handleCreateSecret}
                 disabled={isGenerating}
-                className="w-full max-w-xs"
+                className="w-full max-w-xs bg-blue-600 hover:bg-blue-700 text-white"
                 size="lg"
               >
                 {isGenerating ? 'Generating...' : 'Generate Secret Link'}
@@ -139,7 +149,7 @@ const Index = () => {
               <Button 
                 variant="outline" 
                 onClick={handleReset}
-                className="w-full max-w-xs"
+                className="w-full max-w-xs border-neutral-700 hover:bg-neutral-800 text-neutral-300"
               >
                 Create Another Secret
               </Button>

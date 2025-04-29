@@ -5,65 +5,35 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
+    --background: 0 0% 0%; /* Black */
+    --foreground: 0 0% 100%; /* White */
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
+    --card: 0 0% 0%; /* Black */
+    --card-foreground: 0 0% 100%; /* White */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
+    --popover: 0 0% 0%; /* Black */
+    --popover-foreground: 0 0% 100%; /* White */
 
-    --primary: 0 0% 0%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 210 100% 50%; /* Light Blue */
+    --primary-foreground: 0 0% 100%; /* White */
 
-    --secondary: 0 0% 95%;
-    --secondary-foreground: 0 0% 0%;
+    --secondary: 0 0% 10%; /* Dark Gray */
+    --secondary-foreground: 0 0% 100%; /* White */
 
-    --muted: 0 0% 95%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 0 0% 15%; /* Slightly lighter gray */
+    --muted-foreground: 0 0% 70%; /* Light gray */
 
-    --accent: 0 0% 90%;
-    --accent-foreground: 0 0% 0%;
+    --accent: 210 100% 50%; /* Light Blue */
+    --accent-foreground: 0 0% 100%; /* White */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 84.2% 60.2%; /* Red */
+    --destructive-foreground: 0 0% 98%; /* White */
 
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 0 0% 0%;
+    --border: 0 0% 20%; /* Dark gray border */
+    --input: 0 0% 20%; /* Dark gray input */
+    --ring: 210 100% 50%; /* Light Blue ring */
 
     --radius: 0.5rem;
-  }
-
-  .dark {
-    --background: 0 0% 5%;
-    --foreground: 0 0% 98%;
-
-    --card: 0 0% 5%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 0 0% 5%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 5%;
-
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
-
-    --accent: 0 0% 15%;
-    --accent-foreground: 0 0% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
-    --ring: 0 0% 80%;
   }
 }
 
@@ -77,11 +47,13 @@
   }
   
   .glassmorphism {
-    @apply bg-white bg-opacity-70 backdrop-filter backdrop-blur-md border border-white border-opacity-20 shadow-lg;
+    @apply bg-black bg-opacity-70 backdrop-filter backdrop-blur-md border border-neutral-800 border-opacity-20 shadow-lg;
   }
   
   .vault-container {
-    background-image: radial-gradient(circle at 25% 25%, rgba(0, 0, 0, 0.2), transparent 40%),
-                     radial-gradient(circle at 75% 75%, rgba(0, 0, 0, 0.1), transparent 40%);
+    background-color: #000;
+    background-image: 
+      radial-gradient(circle at 20% 20%, rgba(0, 120, 255, 0.05), transparent 25%),
+      radial-gradient(circle at 80% 80%, rgba(0, 120, 255, 0.05), transparent 25%);
   }
 }
