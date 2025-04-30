@@ -9,7 +9,7 @@ export interface SupabaseSecretData {
   file_name?: string;
   file_mime_type?: string;
   max_views: number;
-  expires_at: string;
+  expiry_date: string;
   views: number;
   created_at: string;
   destroyed?: boolean;
@@ -39,7 +39,7 @@ export class SupabaseService {
           file_name: fileName,
           file_mime_type: fileMimeType,
           max_views: maxViews,
-          expires_at: expiryDate.toISOString(),
+          expiry_date: expiryDate.toISOString(),
           views: 0,
           destroyed: false
         })
@@ -92,7 +92,7 @@ export class SupabaseService {
       }
 
       const now = new Date();
-      const expiryDate = new Date(secret.expires_at);
+      const expiryDate = new Date(secret.expiry_date);
       
       // Check if secret is expired
       if (now > expiryDate) {
@@ -192,7 +192,7 @@ export class SupabaseService {
       const { data, error: fetchError } = await supabase
         .from('secrets')
         .select('id')
-        .lt('expires_at', now);
+        .lt('expiry_date', now);
       
       if (fetchError) {
         console.error('Failed to fetch expired secrets:', fetchError);
@@ -207,7 +207,7 @@ export class SupabaseService {
       const { error: deleteError } = await supabase
         .from('secrets')
         .delete()
-        .lt('expires_at', now);
+        .lt('expiry_date', now);
       
       if (deleteError) {
         console.error('Failed to delete expired secrets:', deleteError);
