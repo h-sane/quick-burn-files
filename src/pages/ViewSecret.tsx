@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,11 +11,14 @@ import { supabaseService } from '@/services/supabase';
 import { extractSecretIdFromMaskedUrl } from '@/services/urlMasking';
 import { Eye, Download, ArrowLeft, Clock, Trash, ShieldAlert } from 'lucide-react';
 
+// Define valid status types
+type SecretStatus = 'loading' | 'success' | 'expired' | 'destroyed' | 'not_found' | 'error';
+
 const ViewSecret = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [secretData, setSecretData] = useState<SecretData | null>(null);
-  const [status, setStatus] = useState<'loading' | 'success' | 'expired' | 'destroyed' | 'not_found' | 'error'>('loading');
+  const [status, setStatus] = useState<SecretStatus>('loading');
   const [remainingViews, setRemainingViews] = useState(0);
   const [isFinalView, setIsFinalView] = useState(false);
 
@@ -27,9 +31,12 @@ const ViewSecret = () => {
     const fetchSecret = async () => {
       try {
         const realId = extractSecretIdFromMaskedUrl(id) || id;
-        const result = await supabaseService.retrieveSecret(realId);
+        console.log('Fetching secret with ID:', realId);
         
-        setStatus(result.status);
+        const result = await supabaseService.retrieveSecret(realId);
+        console.log('Secret fetch result:', result);
+        
+        setStatus(result.status as SecretStatus);
         
         if (result.data) {
           setSecretData(result.data);
@@ -90,6 +97,13 @@ const ViewSecret = () => {
       toast.success('Download started', {
         description: isFinalView ? 'File will be deleted after this download' : undefined
       });
+      
+      // If this is the final view, force refresh to show it's been destroyed
+      if (isFinalView) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
     } catch (error) {
       console.error('Download failed', error);
       toast.error('Failed to download file');
@@ -161,7 +175,6 @@ const ViewSecret = () => {
                   <Button 
                     onClick={downloadFile} 
                     className="bg-blue-600 hover:bg-blue-700 text-white"
-                    disabled={status === 'destroyed'} 
                   >
                     <Download className="h-5 w-5 mr-2" />
                     {isFinalView ? 'Download (Last Chance)' : 'Download File'}
@@ -200,7 +213,7 @@ const ViewSecret = () => {
             <Clock className="h-5 w-5" />
             <AlertTitle>Content Expired</AlertTitle>
             <AlertDescription className="text-neutral-300">
-              This secret expired on {secretData?.expiryDate.toLocaleString()} and has been automatically deleted.
+              This secret expired on {secretData?.expiryDate?.toLocaleString()} and has been automatically deleted.
             </AlertDescription>
           </Alert>
         );
