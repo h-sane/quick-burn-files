@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -162,7 +161,7 @@ const ViewSecret = () => {
                   <Button 
                     onClick={downloadFile} 
                     className="bg-blue-600 hover:bg-blue-700 text-white"
-                    disabled={status === 'destroyed'}
+                    disabled={status === 'destroyed'} 
                   >
                     <Download className="h-5 w-5 mr-2" />
                     {isFinalView ? 'Download (Last Chance)' : 'Download File'}

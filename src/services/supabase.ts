@@ -133,8 +133,8 @@ export class SupabaseService {
         .from('secrets')
         .update({ 
           destroyed: true,
-          // Use a direct number increment instead of RPC
-          views: supabase.rpc('increment', { row_id: id, increment_by: 1 }) 
+          // Increment views directly in the update
+          views: secret => secret.views + 1
         })
         .eq('id', id);
 
