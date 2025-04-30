@@ -12,7 +12,7 @@ export interface SupabaseSecretData {
   expires_at: string;
   views: number;
   created_at: string;
-  destroyed?: boolean; // Added for better state tracking
+  destroyed?: boolean;
 }
 
 export class SupabaseService {
@@ -41,7 +41,7 @@ export class SupabaseService {
           max_views: maxViews,
           expires_at: expiryDate.toISOString(),
           views: 0,
-          destroyed: false // Explicit initial state
+          destroyed: false
         })
         .select('id')
         .single();
@@ -57,38 +57,65 @@ export class SupabaseService {
   }
 
   /**
-   * Enhanced retrieveSecret with transaction-like behavior
+   * Enhanced retrieveSecret with better error handling and destruction logic
    */
   async retrieveSecret(id: string): Promise<{
     data: SecretData | null;
     status: 'success' | 'expired' | 'destroyed' | 'not_found' | 'error';
   }> {
     try {
-      // Start transaction by getting the secret with row locking
+      console.log(`Retrieving secret with ID: ${id}`);
+      
+      // First, check if secret exists
       const { data: secret, error: fetchError } = await supabase
         .from('secrets')
         .select('*')
         .eq('id', id)
         .single();
       
-      if (fetchError || !secret) {
+      console.log('Fetch result:', secret || 'No data', fetchError || 'No error');
+      
+      if (fetchError) {
+        console.error('Error fetching secret:', fetchError);
         return { data: null, status: 'not_found' };
       }
 
-      // Check if already destroyed
+      if (!secret) {
+        console.log('Secret not found');
+        return { data: null, status: 'not_found' };
+      }
+      
+      // Check if secret was already destroyed
       if (secret.destroyed) {
+        console.log('Secret already marked as destroyed');
         return { data: null, status: 'destroyed' };
       }
 
       const now = new Date();
       const expiryDate = new Date(secret.expires_at);
-      const newViewCount = secret.views + 1;
-      const maxViewsReached = newViewCount >= secret.max_views;
-
-      // Handle expired secrets
+      
+      // Check if secret is expired
       if (now > expiryDate) {
+        console.log('Secret is expired, destroying it');
         await this.markSecretAsDestroyed(id);
         return { data: null, status: 'expired' };
+      }
+
+      // Increment view count atomically
+      const newViewCount = secret.views + 1;
+      const maxViewsReached = newViewCount >= secret.max_views;
+      
+      console.log(`Views: ${newViewCount}/${secret.max_views}, Max reached: ${maxViewsReached}`);
+      
+      // Update the view count before returning data
+      const { error: updateError } = await supabase
+        .from('secrets')
+        .update({ views: newViewCount })
+        .eq('id', id);
+        
+      if (updateError) {
+        console.error('Failed to update view count:', updateError);
+        return { data: null, status: 'error' };
       }
 
       // Prepare response data
@@ -105,24 +132,13 @@ export class SupabaseService {
         destroyed: maxViewsReached
       };
 
-      // Update or delete based on view count
+      // If max views reached, destroy the secret after preparing the response
       if (maxViewsReached) {
+        console.log('Max views reached, destroying secret after this view');
         await this.markSecretAsDestroyed(id);
-      } else {
-        // Just increment the view count
-        const { error: updateError } = await supabase
-          .from('secrets')
-          .update({ views: newViewCount })
-          .eq('id', id);
-          
-        if (updateError) {
-          console.error('Failed to update view count:', updateError);
-          return { data: null, status: 'error' };
-        }
       }
 
       return { data: secretData, status: 'success' };
-
     } catch (error) {
       console.error('SupabaseService.retrieveSecret failed:', error);
       return { data: null, status: 'error' };
@@ -130,13 +146,13 @@ export class SupabaseService {
   }
 
   /**
-   * Refactored method to consistently mark secrets as destroyed and delete them
+   * Method to mark secrets as destroyed and delete them
    */
   private async markSecretAsDestroyed(id: string): Promise<void> {
     try {
-      console.log(`Marking secret ${id} as destroyed`);
+      console.log(`Marking secret ${id} as destroyed and deleting it`);
       
-      // First mark as destroyed
+      // First mark as destroyed to ensure consistent state
       const { error: updateError } = await supabase
         .from('secrets')
         .update({ destroyed: true })
@@ -160,13 +176,13 @@ export class SupabaseService {
       
       console.log(`Secret ${id} successfully destroyed and deleted`);
     } catch (error) {
-      console.error('Failed to mark secret as destroyed:', error);
-      throw error;
+      console.error('Failed to completely destroy secret:', error);
+      throw new Error('Failed to destroy secret');
     }
   }
 
   /**
-   * Fixed method to cleanup expired secrets
+   * Method to cleanup expired secrets
    */
   async cleanupExpiredSecrets(): Promise<number> {
     try {

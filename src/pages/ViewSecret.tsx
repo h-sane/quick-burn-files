@@ -36,7 +36,7 @@ const ViewSecret = () => {
         const result = await supabaseService.retrieveSecret(realId);
         console.log('Secret fetch result:', result);
         
-        setStatus(result.status as SecretStatus);
+        setStatus(result.status);
         
         if (result.data) {
           setSecretData(result.data);
@@ -57,8 +57,8 @@ const ViewSecret = () => {
           }
         }
       } catch (error) {
-        console.error('Failed to retrieve secret', error);
-        setStatus('not_found');
+        console.error('Failed to retrieve secret:', error);
+        setStatus('error');
         toast.error('Failed to load secret');
       }
     };
@@ -213,7 +213,14 @@ const ViewSecret = () => {
             <Clock className="h-5 w-5" />
             <AlertTitle>Content Expired</AlertTitle>
             <AlertDescription className="text-neutral-300">
-              This secret expired on {secretData?.expiryDate?.toLocaleString()} and has been automatically deleted.
+              This secret expired and has been automatically deleted.
+              <Button 
+                variant="link" 
+                className="text-blue-400 ml-2 p-0 h-auto" 
+                onClick={() => navigate('/')}
+              >
+                Create a new secret
+              </Button>
             </AlertDescription>
           </Alert>
         );
