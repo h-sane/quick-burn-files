@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { SecretData } from './storage';
 
@@ -8,7 +9,7 @@ export interface SupabaseSecretData {
   file_name?: string;
   file_mime_type?: string;
   max_views: number;
-  expiry_date: string;
+  expires_at: string;
   views: number;
   created_at: string;
   destroyed?: boolean; // Added for better state tracking
@@ -38,7 +39,7 @@ export class SupabaseService {
           file_name: fileName,
           file_mime_type: fileMimeType,
           max_views: maxViews,
-          expiry_date: expiryDate.toISOString(),
+          expires_at: expiryDate.toISOString(),
           views: 0,
           destroyed: false // Explicit initial state
         })
@@ -80,7 +81,7 @@ export class SupabaseService {
       }
 
       const now = new Date();
-      const expiryDate = new Date(secret.expiry_date);
+      const expiryDate = new Date(secret.expires_at);
       const newViewCount = secret.views + 1;
       const maxViewsReached = newViewCount >= secret.max_views;
 
@@ -159,7 +160,7 @@ export class SupabaseService {
       const { count, error } = await supabase
         .from('secrets')
         .delete()
-        .lt('expiry_date', new Date().toISOString());
+        .lt('expires_at', new Date().toISOString());
       
       if (error) throw error;
       return count || 0;

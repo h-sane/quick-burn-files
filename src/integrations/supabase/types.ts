@@ -13,7 +13,8 @@ export type Database = {
         Row: {
           content: string
           created_at: string
-          expiry_date: string
+          destroyed: boolean
+          expires_at: string
           file_mime_type: string | null
           file_name: string | null
           id: string
@@ -24,7 +25,8 @@ export type Database = {
         Insert: {
           content: string
           created_at?: string
-          expiry_date: string
+          destroyed?: boolean
+          expires_at: string
           file_mime_type?: string | null
           file_name?: string | null
           id?: string
@@ -35,7 +37,8 @@ export type Database = {
         Update: {
           content?: string
           created_at?: string
-          expiry_date?: string
+          destroyed?: boolean
+          expires_at?: string
           file_mime_type?: string | null
           file_name?: string | null
           id?: string
