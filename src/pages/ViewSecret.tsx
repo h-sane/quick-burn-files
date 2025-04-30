@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -14,7 +15,7 @@ const ViewSecret = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [secretData, setSecretData] = useState<SecretData | null>(null);
-  const [status, setStatus] = useState<'loading' | 'success' | 'expired' | 'destroyed' | 'not_found'>('loading');
+  const [status, setStatus] = useState<'loading' | 'success' | 'expired' | 'destroyed' | 'not_found' | 'error'>('loading');
   const [remainingViews, setRemainingViews] = useState(0);
   const [isFinalView, setIsFinalView] = useState(false);
 
@@ -161,7 +162,7 @@ const ViewSecret = () => {
                   <Button 
                     onClick={downloadFile} 
                     className="bg-blue-600 hover:bg-blue-700 text-white"
-                    disabled={isFinalView && status === 'destroyed'}
+                    disabled={status === 'destroyed'}
                   >
                     <Download className="h-5 w-5 mr-2" />
                     {isFinalView ? 'Download (Last Chance)' : 'Download File'}
@@ -218,6 +219,23 @@ const ViewSecret = () => {
                 onClick={() => navigate('/')}
               >
                 Create a new secret
+              </Button>
+            </AlertDescription>
+          </Alert>
+        );
+      
+      case 'error':
+        return (
+          <Alert variant="destructive" className="border-red-800 bg-black text-red-500">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription className="text-neutral-300">
+              There was an error accessing this secret.
+              <Button 
+                variant="link" 
+                className="text-blue-400 ml-2 p-0 h-auto" 
+                onClick={() => navigate('/')}
+              >
+                Return to safety
               </Button>
             </AlertDescription>
           </Alert>

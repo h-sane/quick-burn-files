@@ -133,7 +133,8 @@ export class SupabaseService {
         .from('secrets')
         .update({ 
           destroyed: true,
-          views: supabase.rpc('increment', { val: 1 }) 
+          // Use a direct number increment instead of RPC
+          views: supabase.rpc('increment', { row_id: id, increment_by: 1 }) 
         })
         .eq('id', id);
 
@@ -157,13 +158,14 @@ export class SupabaseService {
    */
   async cleanupExpiredSecrets(): Promise<number> {
     try {
-      const { count, error } = await supabase
+      const { data, error } = await supabase
         .from('secrets')
         .delete()
-        .lt('expires_at', new Date().toISOString());
+        .lt('expires_at', new Date().toISOString())
+        .select('id');
       
       if (error) throw error;
-      return count || 0;
+      return data?.length || 0;
     } catch (error) {
       console.error('Failed to cleanup expired secrets:', error);
       return 0;
